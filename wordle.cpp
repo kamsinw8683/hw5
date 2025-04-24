@@ -37,21 +37,33 @@ std::set<std::string> wordle(
 void generateWords(const string& in, const string& floating, 
                   const set<string>& dict, string& current, 
                   set<string>& results, size_t pos, map<char, int>& floatingCount) {
-    // Base case:
+    // Base case: if we've filled all positions
     if (pos == in.size()) {
-        // Check if the word exists in the dictionary
-        if (dict.find(current) != dict.end()) {
+        // Check if we've used all floating letters
+        bool allFloatingUsed = true;
+        for (std::pair<const char, int> pair : floatingCount) {
+            if (pair.second > 0) {  // If we have remaining floating letters
+                allFloatingUsed = false;
+                break;
+            }
+        }
+        
+        // Only check dictionary if we've used all floating letters
+        if (allFloatingUsed && dict.find(current) != dict.end()) {
             results.insert(current);
         }
         return;
     }
 
+    // If this position is fixed
     if (in[pos] != '-') {
         current += in[pos];
         generateWords(in, floating, dict, current, results, pos + 1, floatingCount);
+        current.pop_back();
         return;
     }
 
+    // Try all lowercase letters
     for (char c = 'a'; c <= 'z'; c++) {
         // If this letter is in floating letters and we haven't used it enough times
         if (floatingCount.find(c) != floatingCount.end() && floatingCount[c] > 0) {
