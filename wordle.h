@@ -4,6 +4,7 @@
 #ifndef RECCHECK
 #include <set>
 #include <string>
+#include <map>
 #endif
 
 /**
@@ -22,4 +23,20 @@ std::set<std::string> wordle(
     const std::string& floating,
     const std::set<std::string>& dict);
 
-#endif
+/**
+ * @brief Recursively generates all possible word combinations that match the given constraints
+ * 
+ * @param [in] in - string of fixed, correct characters and `-`s to indicate open positions
+ * @param [in] floating - Characters that must be used somewhere in the word
+ * @param [in] dict - Dictionary of strings of legal words
+ * @param [in,out] current - Current partial word being constructed
+ * @param [out] results - Set to store valid words that match the criteria
+ * @param [in] pos - Current position in the word being processed
+ * @param [in,out] floatingCount - Map tracking remaining occurrences of floating characters
+ */
+void generateWords(const std::string& in, const std::string& floating, 
+                  const std::set<std::string>& dict, std::string& current, 
+                  std::set<std::string>& results, size_t pos, 
+                  std::map<char, int>& floatingCount);
+
+#endif // WORDLE_H
