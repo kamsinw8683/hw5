@@ -34,9 +34,12 @@ std::set<std::string> wordle(
  * @param [in] pos - Current position in the word being processed
  * @param [in,out] floatingCount - Map tracking remaining occurrences of floating characters
  */
-void generateWords(const std::string& in, const std::string& floating, 
-                  const std::set<std::string>& dict, std::string& current, 
-                  std::set<std::string>& results, size_t pos, 
-                  std::map<char, int>& floatingCount);
+void generateWords(const std::string& pattern,
+                   const std::string& floating,
+                   const std::set<std::string>& dict,
+                   std::string& current,
+                   std::set<std::string>& results,
+                   std::size_t pos,
+                   std::map<char,int>& floatingCount);
 
 #endif // WORDLE_H

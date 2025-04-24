@@ -34,51 +34,55 @@ std::set<std::string> wordle(
 }
 
 // Define any helper functions here
-void generateWords(const string& in, const string& floating, 
-                  const set<string>& dict, string& current, 
-                  set<string>& results, size_t pos, map<char, int>& floatingCount) {
-    // Base case: if we've filled all positions
-    if (pos == in.size()) {
-        // Check if we've used all floating letters
-        bool allFloatingUsed = true;
-        for (std::pair<const char, int> pair : floatingCount) {
-            if (pair.second > 0) {  // If we have remaining floating letters
-                allFloatingUsed = false;
+void generateWords(const std::string& pattern,
+                   const std::string& floating,
+                   const std::set<std::string>& dict,
+                   std::string& current,
+                   std::set<std::string>& results,
+                   std::size_t pos,
+                   std::map<char,int>& floatingCount)
+{
+    // Base case: filled all positions
+    if (pos == pattern.size()) {
+        bool allUsed = true;
+        for (std::map<char,int>::const_iterator it = floatingCount.begin();
+             it != floatingCount.end();
+             ++it)
+        {
+            if (it->second != 0) {
+                allUsed = false;
                 break;
             }
         }
-        
-        // Only check dictionary if we've used all floating letters
-        if (allFloatingUsed && dict.find(current) != dict.end()) {
+        if (allUsed && dict.find(current) != dict.end()) {
             results.insert(current);
         }
         return;
     }
 
     // If this position is fixed
-    if (in[pos] != '-') {
-        current += in[pos];
-        generateWords(in, floating, dict, current, results, pos + 1, floatingCount);
+    if (pattern[pos] != '-') {
+        current.push_back(pattern[pos]);
+        generateWords(pattern, floating, dict, current, results, pos + 1, floatingCount);
         current.pop_back();
         return;
     }
 
-    // Try all lowercase letters
-    for (char c = 'a'; c <= 'z'; c++) {
-        // If this letter is in floating letters and we haven't used it enough times
-        if (floatingCount.find(c) != floatingCount.end() && floatingCount[c] > 0) {
-            current += c;
-            floatingCount[c]--;
-            generateWords(in, floating, dict, current, results, pos + 1, floatingCount);
-            floatingCount[c]++;
+    // Try every letter 'a'..'z'
+    for (char c = 'a'; c <= 'z'; ++c) {
+        // (1) Use a required floating letter, if still needed
+        std::map<char,int>::iterator fit = floatingCount.find(c);
+        if (fit != floatingCount.end() && fit->second > 0) {
+            current.push_back(c);
+            fit->second--;
+            generateWords(pattern, floating, dict, current, results, pos + 1, floatingCount);
+            fit->second++;
             current.pop_back();
         }
-        // If this letter is not in floating letters
-        else if (floatingCount.find(c) == floatingCount.end()) {
-            current += c;
-            generateWords(in, floating, dict, current, results, pos + 1, floatingCount);
-            current.pop_back();
-        }
+
+        // (2) Always allow as a filler letter
+        current.push_back(c);
+        generateWords(pattern, floating, dict, current, results, pos + 1, floatingCount);
+        current.pop_back();
     }
 }
-
