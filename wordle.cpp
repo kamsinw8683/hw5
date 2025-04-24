@@ -2,7 +2,7 @@
 // For debugging
 #include <iostream>
 // For std::remove
-#include <algorithm> 
+#include <algorithm>
 #include <map>
 #include <set>
 #endif
@@ -11,78 +11,89 @@
 #include "dict-eng.h"
 using namespace std;
 
-
 // Add prototypes of helper functions here
 
 
-// Definition of primary wordle function
 std::set<std::string> wordle(
-    const std::string& in,
-    const std::string& floating,
-    const std::set<std::string>& dict)
+    const std::string &in,
+    const std::string &floating,
+    const std::set<std::string> &dict)
 {
-    set<string> results;
-    string current;
-    map<char, int> floatingCount;
-    
-    for (char c : floating) {
-        floatingCount[c]++;
+    // Add your code here
+    std::set<std::string> filteredDict;
+    std::set<std::string>::iterator wordIterator;
+
+    for (wordIterator = dict.begin(); wordIterator != dict.end(); ++wordIterator)
+    {
+        std::string currWord = *wordIterator;
+        bool valid = true;
+
+        for (int i = 0; i < currWord.length(); i++)
+        {
+            if (isalpha(currWord[i]) == 0)
+            {
+                valid = false;
+            }
+            else if (islower(currWord[i]) == 0)
+            {
+                valid = false;
+            }
+        }
+        if (valid && (validateWord(currWord, floating, 0) && in.length() == currWord.length()))
+        {
+            filteredDict.insert(currWord);
+        }
     }
-    
-    generateWords(in, floating, dict, current, results, 0, floatingCount);
-    return results;
+    filteredDict = wordleHelper(in, floating, filteredDict, 0);
+
+    return filteredDict;
 }
 
 // Define any helper functions here
-void generateWords(const std::string& pattern,
-                   const std::string& floating,
-                   const std::set<std::string>& dict,
-                   std::string& current,
-                   std::set<std::string>& results,
-                   std::size_t pos,
-                   std::map<char,int>& floatingCount)
+std::set<std::string> wordleHelper(
+    const std::string &in,
+    const std::string &floating,
+    const std::set<std::string> &dict,
+    int currentPosition)
 {
-    // Base case: filled all positions
-    if (pos == pattern.size()) {
-        bool allUsed = true;
-        for (std::map<char,int>::const_iterator it = floatingCount.begin();
-             it != floatingCount.end();
-             ++it)
+    std::set<std::string> filteredDict;
+    std::set<std::string>::iterator wordIterator;
+
+    if (currentPosition >= in.length())
+    {
+        return dict;
+    }
+    if (in[currentPosition] == '-')
+    {
+        return wordleHelper(in, floating, dict, currentPosition + 1);
+    }
+
+    for (wordIterator = dict.begin(); wordIterator != dict.end(); ++wordIterator)
+    {
+        if (in[currentPosition] != '-' && (*wordIterator)[currentPosition] == in[currentPosition])
+            filteredDict.insert(*wordIterator);
+    }
+
+    return wordleHelper(in, floating, filteredDict, currentPosition + 1);
+}
+
+bool validateWord(std::string word, std::string floating, int wordPosition)
+{
+    bool found = false;
+    std::string updatedWord = word;
+
+    if (wordPosition >= floating.length())
+    {
+        return true;
+    }
+    for (int i = 0; i < word.length(); i++)
+    {
+        if (word[i] == floating[wordPosition])
         {
-            if (it->second != 0) {
-                allUsed = false;
-                break;
-            }
+            updatedWord.erase(i, 1);
+            found = true;
+            break;
         }
-        if (allUsed && dict.find(current) != dict.end()) {
-            results.insert(current);
-        }
-        return;
     }
-
-    // If this position is fixed
-    if (pattern[pos] != '-') {
-        current.push_back(pattern[pos]);
-        generateWords(pattern, floating, dict, current, results, pos + 1, floatingCount);
-        current.pop_back();
-        return;
-    }
-
-    // Try every letter 'a'..'z'
-    for (char c = 'a'; c <= 'z'; ++c) {
-        // (1) Use a required floating letter, if still needed
-        std::map<char,int>::iterator fit = floatingCount.find(c);
-        if (fit != floatingCount.end() && fit->second > 0) {
-            current.push_back(c);
-            fit->second--;
-            generateWords(pattern, floating, dict, current, results, pos + 1, floatingCount);
-            fit->second++;
-            current.pop_back();
-        }
-
-        // (2) Always allow as a filler letter
-        current.push_back(c);
-        generateWords(pattern, floating, dict, current, results, pos + 1, floatingCount);
-        current.pop_back();
-    }
+    return found && validateWord(updatedWord, floating, wordPosition + 1);
 }

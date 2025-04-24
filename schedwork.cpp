@@ -20,9 +20,54 @@ using namespace std;
 static const Worker_T INVALID_ID = (unsigned int)-1;
 
 // Add prototypes for any helper functions here
+bool scheduleHelper(
+    const AvailabilityMatrix &avail,
+    const size_t dailyNeed,
+    const size_t maxShifts,
+    DailySchedule &sched,
+    int currentDay,
+    int position,
+    vector<int> &shiftList)
+{
+
+    if (currentDay == sched.size())
+    {
+        return true;
+    }
+    for (size_t worker = 0; worker < avail[currentDay].size(); ++worker)
+    {
+        bool isAvailable = (avail[currentDay][worker] == 1);
+        bool canWorkMore = (shiftList[worker] < maxShifts);
+        bool notScheduledToday = (find(sched[currentDay].begin(), sched[currentDay].end(), worker) == sched[currentDay].end());
+
+        if (isAvailable && canWorkMore && notScheduledToday)
+        {
+            sched[currentDay][position] = worker;
+            shiftList[worker]++;
+            bool success;
+
+            if (position == dailyNeed - 1)
+            {
+                success = scheduleHelper(avail, dailyNeed, maxShifts, sched, currentDay + 1, 0, shiftList);
+            }
+            else
+            {
+                success = scheduleHelper(avail, dailyNeed, maxShifts, sched, currentDay, position + 1, shiftList);
+            }
+            if (success)
+            {
+                return true;
+            }
+            // Backtrack if not successful
+            shiftList[worker]--;
+            sched[currentDay][position] = INVALID_ID;
+        }
+    }
+
+    return false;
+}
 
 // Add your implementation of schedule() and other helper functions here
-
 bool schedule(
     const AvailabilityMatrix &avail,
     const size_t dailyNeed,
@@ -35,75 +80,10 @@ bool schedule(
     }
     sched.clear();
     // Add your code below
-    sched.resize(avail.size());
-    for (size_t i = 0; i < avail.size(); i++) {
-        sched[i].resize(dailyNeed, INVALID_ID);
-    }
-    
-    // Initialize shift count for each worker
-    vector<size_t> shifts(avail[0].size(), 0);
-    
-    return findSchedule(avail, dailyNeed, maxShifts, sched, shifts, 0, 0);
-}
-bool canScheduleWorker(const AvailabilityMatrix &avail, const DailySchedule &sched,
-                       const vector<size_t> &shifts, size_t day, Worker_T worker,
-                       size_t maxShifts)
-{
-    // Check if worker is available
-    if (!avail[day][worker])
-    {
-        return false;
-    }
 
-    if (shifts[worker] >= maxShifts)
-    {
-        return false;
-    }
+    sched.clear();
+    vector<int> shiftList(avail[0].size(), 0);
+    sched.resize(avail.size(), vector<Worker_T>(dailyNeed, INVALID_ID));
 
-    // Check if worker is already scheduled for this day
-    for (size_t i = 0; i < sched[day].size(); i++)
-    {
-        if (sched[day][i] == worker)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool findSchedule(const AvailabilityMatrix &avail, const size_t dailyNeed,
-                  const size_t maxShifts, DailySchedule &sched,
-                  vector<size_t> &shifts, size_t day, size_t pos)
-{
-    // Base case: if we've scheduled all days
-    if (day == avail.size())
-    {
-        return true;
-    }
-
-    // Base case: if we've filled all positions for this day
-    if (pos == dailyNeed)
-    {
-        return findSchedule(avail, dailyNeed, maxShifts, sched, shifts, day + 1, 0);
-    }
-
-    for (Worker_T worker = 0; worker < avail[0].size(); worker++)
-    {
-        if (canScheduleWorker(avail, sched, shifts, day, worker, maxShifts))
-        {
-            sched[day][pos] = worker;
-            shifts[worker]++;
-
-            if (findSchedule(avail, dailyNeed, maxShifts, sched, shifts, day, pos + 1))
-            {
-                return true;
-            }
-
-            // Backtrack
-            shifts[worker]--;
-        }
-    }
-
-    return false;
+    return scheduleHelper(avail, dailyNeed, maxShifts, sched, 0, 0, shiftList);
 }

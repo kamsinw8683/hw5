@@ -37,46 +37,7 @@ bool schedule(
     const size_t maxShifts,
     DailySchedule& sched
 );
-/**
- * @brief Checks if a worker can be scheduled on a given day
- * 
- * This function verifies if a worker can be scheduled for a particular
- * day by checking:
- * - Worker's availability on that day
- * - Worker's current shift count against max allowed shifts
- * - Worker's presence in current day's schedule
- * 
- * @param [in] avail The availability matrix
- * @param [in] sched The current schedule
- * @param [in] shifts Array tracking number of shifts for each worker
- * @param [in] day The day to check
- * @param [in] worker The worker to check
- * @param [in] maxShifts Maximum allowed shifts for any worker
- * @return true if worker can be scheduled, false otherwise
- */
-bool canScheduleWorker(const AvailabilityMatrix& avail, const DailySchedule& sched,
-    const std::vector<size_t>& shifts, size_t day, Worker_T worker,
-    size_t maxShifts);
 
-/**
-* @brief Recursively finds a valid work schedule
-* 
-* This function uses backtracking to find a valid schedule that meets
-* all constraints. It attempts to fill each position in the schedule
-* recursively, backtracking when constraints are violated.
-* 
-* @param [in] avail The availability matrix
-* @param [in] dailyNeed Number of workers needed per day
-* @param [in] maxShifts Maximum shifts any worker is allowed
-* @param [in,out] sched The schedule being constructed
-* @param [in,out] shifts Array tracking number of shifts for each worker
-* @param [in] day Current day being scheduled
-* @param [in] pos Current position within the day being scheduled
-* @return true if a valid schedule is found, false otherwise
-*/
-bool findSchedule(const AvailabilityMatrix& avail, const size_t dailyNeed,
-const size_t maxShifts, DailySchedule& sched,
-std::vector<size_t>& shifts, size_t day, size_t pos);
 
 
 #endif
