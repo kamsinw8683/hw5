@@ -81,7 +81,6 @@ bool schedule(
     sched.clear();
     // Add your code below
 
-    sched.clear();
     vector<int> shiftList(avail[0].size(), 0);
     sched.resize(avail.size(), vector<Worker_T>(dailyNeed, INVALID_ID));
 

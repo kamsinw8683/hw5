@@ -54,46 +54,46 @@ std::set<std::string> wordleHelper(
     const std::string &in,
     const std::string &floating,
     const std::set<std::string> &dict,
-    int currentPosition)
+    int curPos)
 {
     std::set<std::string> filteredDict;
     std::set<std::string>::iterator wordIterator;
 
-    if (currentPosition >= in.length())
+    if (curPos >= in.length())
     {
         return dict;
     }
-    if (in[currentPosition] == '-')
+    if (in[curPos] == '-')
     {
-        return wordleHelper(in, floating, dict, currentPosition + 1);
+        return wordleHelper(in, floating, dict, curPos + 1);
     }
 
     for (wordIterator = dict.begin(); wordIterator != dict.end(); ++wordIterator)
     {
-        if (in[currentPosition] != '-' && (*wordIterator)[currentPosition] == in[currentPosition])
+        if (in[curPos] != '-' && (*wordIterator)[curPos] == in[curPos])
             filteredDict.insert(*wordIterator);
     }
 
-    return wordleHelper(in, floating, filteredDict, currentPosition + 1);
+    return wordleHelper(in, floating, filteredDict, curPos + 1);
 }
 
-bool validateWord(std::string word, std::string floating, int wordPosition)
+bool validateWord(std::string word, std::string floating, int wordPos)
 {
     bool found = false;
     std::string updatedWord = word;
 
-    if (wordPosition >= floating.length())
+    if (wordPos >= floating.length())
     {
         return true;
     }
     for (int i = 0; i < word.length(); i++)
     {
-        if (word[i] == floating[wordPosition])
+        if (word[i] == floating[wordPos])
         {
             updatedWord.erase(i, 1);
             found = true;
             break;
         }
     }
-    return found && validateWord(updatedWord, floating, wordPosition + 1);
+    return found && validateWord(updatedWord, floating, wordPos + 1);
 }
